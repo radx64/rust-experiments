@@ -1,0 +1,51 @@
+use std::io;
+
+fn main() {
+    'main: loop {
+        let mut option = String::new();
+
+        let option: u32 =  loop {
+            println!("Select option:");
+            println!("1 - Fahrenheit to Celsius");
+            println!("2 - Celsius to Fahrenheit");
+            println!("3 - Exit");
+
+            option.clear();
+            io::stdin()
+                .read_line(&mut option)
+                .expect("Failed to read line");
+
+            match option.trim().parse(){
+                Ok(num) => break match num {
+                    1 | 2 => num,
+                    3 => break 'main,
+                    _ => continue,
+                },
+                Err(_) => continue
+            };
+        };
+
+        println!("You've entered {option}");
+
+        let mut temperature = String::new();
+
+
+        let temperature: f32 = loop {
+            println!("Enter temperature to convert: ");
+            temperature.clear();
+            io::stdin().read_line(&mut temperature).expect("Failed to read temp");
+
+            match temperature.trim().parse(){
+                Ok(num) => break num,
+                Err(_) => continue
+            }
+        };
+
+        if option == 1 {
+            println!{"Temperature {temperature}*F is {}*C", (temperature - 32.0) / 1.8}
+        }else{
+            println!{"Temperature {temperature}*C is {}*F", temperature * 1.8 + 32.0}
+        }
+    }
+
+}
