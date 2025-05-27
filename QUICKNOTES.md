@@ -54,3 +54,8 @@ cargo check           - check if project compiles
 ```
 
 Cargo stores compilation results in `target/` directory
+
+
+
+# Language
+drop - function called when object goes out of scope (destructor? - not exactly, cant use Copy if drop is used)
