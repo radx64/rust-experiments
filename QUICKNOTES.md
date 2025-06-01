@@ -55,7 +55,47 @@ cargo check           - check if project compiles
 
 Cargo stores compilation results in `target/` directory
 
-
-
 # Language
 drop - function called when object goes out of scope (destructor? - not exactly, cant use Copy if drop is used)
+
+## Arrays 
+```rust
+let a = [1, 2, 3, 4, 5];
+```
+
+## Tuples
+```rust
+let tup: (i32, f64, u8) = (500, 6.4, 1);
+```
+
+## Borrows
+  & - acts as a reference (borrows instance)
+
+## Strings
+  str - basic string slice type to which String is convertible
+
+## Mutable and immutable references
+  You can't have both mutable an immutable references (borrows) at the same time
+
+## Structs
+  When initializing struct fields inside of function there is a shorthand, if function parameter has a same name as struct field, field name can be ommited so instead user: user, you can write just user on struct parameter list.
+
+### Field update syntax
+```rust
+let user2 = User {
+    email: String::from("yetanotheremail@world.com"),
+    username: user1.username.clone(),
+    ..user1     // this is struct update syntax (fill rest fields same as in user1)
+};
+```
+
+### Tuple structs
+```rust
+struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+```
+
+To destructurize tuple struct type name need to be provided
+```rust
+  let Point(x,y,z) = origin;
+```
