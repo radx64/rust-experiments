@@ -72,16 +72,22 @@ let tup: (i32, f64, u8) = (500, 6.4, 1);
 ```
 
 ## Borrows
-  & - acts as a reference (borrows instance)
+  `&` - acts as a reference (borrows instance)
 
 ## Strings
-  str - basic string slice type to which String is convertible
+  `str` - basic string slice type to which String is convertible
 
 ## Mutable and immutable references
   You can't have both mutable an immutable references (borrows) at the same time
 
 ## Structs
-  When initializing struct fields inside of function there is a shorthand, if function parameter has a same name as struct field, field name can be ommited so instead user: user, you can write just user on struct parameter list.
+  When initializing struct fields inside of function there is a shorthand, if function parameter has a same name as struct field, field name can be ommited so instead `username: username`, you can write just `username` on struct parameter list.
+
+```rust
+fn build_user(email: String, username: String) -> User{
+    User { active: true, username, email, sign_in_count: 1 }
+}
+```
 
 ### Field update syntax
 ```rust
