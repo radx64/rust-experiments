@@ -58,6 +58,9 @@ Cargo stores compilation results in `target/` directory
 # Language
 drop - function called when object goes out of scope (destructor? - not exactly, cant use Copy if drop is used)
 
+`#[derive(Debug)]` trait that implements debug printing of a struct that define usage of this.
+Then `println!()` can use `{:?}` or `{:#?}` to make type printable
+
 ## Arrays 
 ```rust
 let a = [1, 2, 3, 4, 5];
@@ -99,3 +102,6 @@ To destructurize tuple struct type name need to be provided
 ```rust
   let Point(x,y,z) = origin;
 ```
+
+### Methods
+Methods take `&self` as a first argument if operates on instance. If self is ommited it is called assoctiated function (something like static class methods in C++) so no instance of a type is needed to call them. `Type::method` syntax is used there when calling
