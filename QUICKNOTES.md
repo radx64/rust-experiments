@@ -111,3 +111,60 @@ To destructurize tuple struct type name need to be provided
 
 ### Methods
 Methods take `&self` as a first argument if operates on instance. If self is ommited it is called assoctiated function (something like static class methods in C++) so no instance of a type is needed to call them. `Type::method` syntax is used there when calling
+
+
+### Enums
+Enums are defined using `enum` keyword
+
+```rust
+enum IpAddrKind {
+    V4,
+    V6
+}
+```
+Every enum value can store data assigned to value. This automatically generates a function that can be used to construct enum instance:
+```rust
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+...
+let home = IpAddr::V4(String::from("127.0.0.1"));
+let loopback = IpAddr::V6(String::from("::1"));
+```
+
+Each enum value can store different types
+
+```rust
+  enum IpAddr {
+      V4(u8, u8, u8, u8),
+      V6(String),
+  }
+
+  let home = IpAddr::V4(127, 0, 0, 1);
+  let loopback = IpAddr::V6(String::from("::1"));
+```
+### Option
+Something like std::optional in cpp but different.
+Enum that stores `Some(T) or None`. Can be used with match construct for handling ok and nok cases/
+
+```rust
+  let some_number = Some(5);
+  let some_char = Some('e');
+
+  let absent_number: Option<i32> = None;
+```
+`None` requires type annotation
+
+
+### Match construct
+Used to map enum values to piece of code to run. Match are exhaustive.
+
+```rust
+match variable {
+ 1 => something,
+ 3 => something_else,
+ other => otherwise(other)  // this can be swaped with _ (placeholder) if we don't want to use value
+}
+```
+unit values `()` can be also returned from match
