@@ -168,3 +168,50 @@ match variable {
 }
 ```
 unit values `()` can be also returned from match
+
+### Concise control flow with if let
+
+```rust
+    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {max}");
+    }
+```
+is equivalent to
+
+```rust
+    let config_max = Some(3u8);
+    match config_max {
+        Some(max) => println!("The maximum is configured to be {max}"),
+        _ => (),
+    }
+```
+
+`if let` can also use else statement which mates to _
+
+```rust
+    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {max}");
+    }
+    else {
+        println!("max is not configured");
+    }
+```
+
+Sometimes you want early exit from function and let can have else for that
+```rust
+fn describe_state_quarter(coin: Coin) -> Option<String> {
+    let Coin::Quarter(state) = coin else {
+        return None;
+    };
+
+    if state.existed_in(1900) {
+        Some(format!("{state:?} is pretty old, for America1"))
+    }
+    else {
+        Some(format!("{state:?} is relatively new."))
+    }
+}
+```
+Above will early exit if coin is not quarter but if it is it will bring state into scope for further handling.
