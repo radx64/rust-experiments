@@ -215,3 +215,81 @@ fn describe_state_quarter(coin: Coin) -> Option<String> {
 }
 ```
 Above will early exit if coin is not quarter but if it is it will bring state into scope for further handling.
+
+
+## Crates and modules
+
+If project has `src/main.rs` it has a binary create. Binary crates **must** have `main` function.
+
+If project has `src/lib.rs` it as a library create. Library crates **does not** have `main` function.
+
+Crate is a single compilation unit.
+
+### Declaring modules
+
+`mod fancy;` - compiler will look for `mod fancy{}` then `src/fancy.rs` then `src/fancy/mod.rs`
+
+### Declaring submodules
+
+in `fancy.rs` `mod disco` - compiler will look for `mod disco{}` then `src/fancy/disco.rd` then `src/fancy/disco/mod.rs`
+
+### Path to the modules
+
+Type `Ball` in module disco would be found at `crate::fancy::disco::Ball`
+
+### Private vs public
+
+Code in the module is private by default. To make module public declare it with `pub mod` instead of `mod`. To make items public within a module use `pub` before declarations of these items.
+
+### Use keyword
+
+`use` creates a shortcut within a scope. `use crate::fancy::disco::Ball` makes `Ball` accessible in a scope without prefix.
+
+
+### Modules hierarchy
+
+```rust
+mod front_of_house {
+    mod hosting {
+        fn add_to_waitlist() {}
+
+        fn seat_at_table() {}
+    }
+
+    mod serving {
+        fn take_order() {}
+
+        fn serve_order() {}
+
+        fn take_payment() {}
+    }
+}
+```
+
+creates
+```
+crate
+ └── front_of_house
+     ├── hosting
+     │   ├── add_to_waitlist
+     │   └── seat_at_table
+     └── serving
+         ├── take_order
+         ├── serve_order
+         └── take_payment
+```
+see `crate` root 
+
+### Paths
+#### Absolute
+  Full path from create name (for external crates) or literal `create` for current create
+
+#### Relative
+  Starts from current module and uses self, super or identifier in current module
+
+Identifiers are followed by `::`
+
+### public in context of structs and enums
+Public struct has a private fields unless fields are defined as public. If there is at least one private field, stuct can't be constructed and there is a need of some kind of factory method in struct itself to exists to construct object.
+
+Public enum makes all variants of enum public.
