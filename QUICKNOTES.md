@@ -243,8 +243,71 @@ Code in the module is private by default. To make module public declare it with 
 
 ### Use keyword
 
-`use` creates a shortcut within a scope. `use crate::fancy::disco::Ball` makes `Ball` accessible in a scope without prefix.
+`use` creates a shortcut **within a scope**. `use crate::fancy::disco::Ball` makes `Ball` accessible in a scope without prefix.
+Follows privacy rules as normal paths.
+Consider using idiomatic paths using `use` keyword, so that module is defined in usage of a function.
 
+Prefer:
+```rust
+use crate::fancy::disco;
+...
+let x = disco::make_ball();
+```
+over:
+```rust
+use crate::fancy::disco::make_ball;
+...
+let x = make_ball{};
+```
+so that module name is explicit.
+
+On the other hand when bringing structs, enums and other items with use it is idiomatic to specify full path.
+
+```rust
+use std::collections::HashMap;
+
+fn main() {
+    let mut map = HashMap::new();
+    map.insert(1, 2);
+}
+```
+This an idiom that rust folks are using. But it has exception. If bringing two structs with the same name from different modules, we fallback to approach with functions
+
+```rust
+use std::fmt;
+use std::io;
+
+fn function1() -> fmt::Result {
+    // --snip--
+}
+
+fn function2() -> io::Result<()> {
+    // --snip--
+}
+```
+#### `as` keyword 
+To provide new name when defining paths with `use` the `as` keyword can be used
+
+```rust
+use std::fmt::Result;
+use std::io::Result as IoResult;
+```
+
+#### re-exporting
+```rust
+mod front_of_house {
+    pub mod hosting {
+        pub fn add_to_waitlist() {}
+    }
+}
+
+pub use crate::front_of_house::hosting;
+
+pub fn eat_at_restaurant() {
+    hosting::add_to_waitlist();
+}
+```
+this make add_to_waitlist callable without need the front_of_house to be `pub`. Also now the call from external module will look like `restaurant::hosting::add_to_waitlist()`
 
 ### Modules hierarchy
 
@@ -293,3 +356,34 @@ Identifiers are followed by `::`
 Public struct has a private fields unless fields are defined as public. If there is at least one private field, stuct can't be constructed and there is a need of some kind of factory method in struct itself to exists to construct object.
 
 Public enum makes all variants of enum public.
+
+
+### External packages
+Defined in `Cargo.toml`, downloaded from `crates.io`
+
+### Nested paths
+instead of:
+```rust
+use std::cmp::Ordering;
+use std::io;
+```
+can use
+```rust
+use std::{cmp::Ordering, io};
+```
+
+instead of:
+```rust
+use std::io;
+use std::io::Write;
+```
+can use
+```rust
+use std::io::{self, Write};
+```
+
+### Glob operator *
+Brings all public items defined in a path into scope
+```rust
+use std::collections::*;
+```
