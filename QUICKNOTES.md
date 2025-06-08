@@ -1,12 +1,62 @@
+# ToC 
+- [ToC](#toc)
+- [Install rustup](#install-rustup)
+  - [Rustup basic info](#rustup-basic-info)
+  - [Updating](#updating)
+  - [Local doc](#local-doc)
+  - [Cargo commands](#cargo-commands)
+- [Language](#language)
+  - [Arrays](#arrays)
+  - [Tuples](#tuples)
+  - [Borrows](#borrows)
+  - [Strings](#strings)
+  - [Mutable and immutable references](#mutable-and-immutable-references)
+  - [Structs](#structs)
+    - [Field update syntax](#field-update-syntax)
+    - [Tuple structs](#tuple-structs)
+    - [Methods](#methods)
+    - [Enums](#enums)
+    - [Option](#option)
+    - [Match construct](#match-construct)
+    - [Concise control flow with if let](#concise-control-flow-with-if-let)
+  - [Crates and modules](#crates-and-modules)
+    - [Declaring modules](#declaring-modules)
+    - [Declaring submodules](#declaring-submodules)
+    - [Path to the modules](#path-to-the-modules)
+    - [Private vs public](#private-vs-public)
+    - [Use keyword](#use-keyword)
+      - [`as` keyword](#as-keyword)
+      - [re-exporting](#re-exporting)
+    - [Modules hierarchy](#modules-hierarchy)
+    - [Paths](#paths)
+      - [Absolute](#absolute)
+      - [Relative](#relative)
+    - [public in context of structs and enums](#public-in-context-of-structs-and-enums)
+    - [External packages](#external-packages)
+    - [Nested paths](#nested-paths)
+    - [Glob operator \*](#glob-operator-)
+  - [Collections](#collections)
+    - [Vector](#vector)
+    - [Strings](#strings-1)
+      - [Creation](#creation)
+      - [Concatenation](#concatenation)
+      - [Indexing](#indexing)
+      - [Slicing](#slicing)
+      - [Iterating over](#iterating-over)
+    - [Hash maps](#hash-maps)
+      - [Creation](#creation-1)
+      - [Element access](#element-access)
+      - [Iterating over](#iterating-over-1)
+      - [Elements ownership](#elements-ownership)
+      - [Entry API](#entry-api)
 
-
-### Install rustup
+# Install rustup
 
 ```
 $ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
 ```
 
-### Rustup basic info
+## Rustup basic info
 
 Rustup metadata and toolchains will be installed into the Rustup
 home directory, located at:
@@ -29,20 +79,20 @@ modifying the profile files located at:
   `/home/radek/.bashrc`
 
 You can uninstall at any time with rustup self uninstall and
-these changes will be reverted.
+these changes will be reverted.   
 
-### Updating
+## Updating
 
 ```
 rustup update
 ```
 
-### Local doc
+## Local doc
 
 ```
 rustup doc
 ```
-### Cargo commands
+## Cargo commands
 
 ```
 cargo new <project_name> - creates new project called <project_name>
@@ -387,3 +437,159 @@ Brings all public items defined in a path into scope
 ```rust
 use std::collections::*;
 ```
+
+## Collections
+
+### Vector
+
+```rust
+let v: Vec<i32> = Vec::create();
+```
+
+### Strings
+#### Creation
+```rust
+let s1 = String::from("Hello");
+  let s2 = "initial contents".to_string();
+```
+
+#### Concatenation
+```rust
+let s1 = String::from("Hello, ");
+let s2 = String::from("world!");
+let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
+```
+The above example is simple but tricky at the same time.Second parameter of `+ operator` is ref and first is moved. It is because `+ operator` uses `add` method that is defined as
+```rust
+fn add(self, s: &str) -> String {
+  ...
+```
+also there is a deref coercion which turns` &String` to `&str`
+
+so `s1` is moved in, `s2` is taken by ref and ownership to modified s1 is returned as `s3`
+
+`format!` macro can be used to construct `Strings` from other `Strings`
+```rust
+
+    let s1 = String::from("tic");
+    let s2 = String::from("tac");
+    let s3 = String::from("toe");  
+
+    let s = format!("{s1}-{s2}-{s3}");
+```
+#### Indexing
+Characters in `Strings` cannot be indexed by `[] operator` as `Strings` are UTF-8 based so in some representations there does not have sense.
+Also `[i]` access should have (O(1)) complexity which can't be guaranteed as string would need to be walked from beginning rendering it more like (O(n))
+
+> [!Caution]
+> ```rust
+> let hello = String::from("Здравствуйте");
+> let character = hello[0];
+> ```
+> Above will not compile.
+
+#### Slicing
+String can be sliced using `[a..b]` as other type slices but these have character boundary check, so trying to create slice in a middle of multibyte character will result in panic
+
+```rust
+
+let hello = String::from("Cześć");
+let slice = &hello[0..4];
+
+```
+will result in
+```
+thread 'main' panicked at src/string.rs:89:19:
+byte index 4 is not a char boundary; it is inside 'ś' (bytes 3..5) of `Cześć`
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+```
+
+#### Iterating over
+```rust
+for c in "Зд".chars() {
+    println!("{c}");
+}
+```
+```
+З
+д
+```
+
+```rust
+for b in "Зд".bytes() {
+    println!("{b}");
+}
+```
+```
+208
+151
+208
+180
+```
+
+### Hash maps
+#### Creation
+```rust
+use std::collections::HashMap;
+...
+let mut scores: HashMap<String, i32> = HashMap::new();
+```
+Not in prelude so need to bring it into scope manually. No macro to create. 
+
+#### Element access
+```rust
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+
+    let team_name = String::from("Blue");
+    let score = scores.get(&team_name).copied().unwrap_or(0);
+```
+`get` method returns `Option<&V>`, `copied()` copy it to `Option<V>` and `unwrap_or(x)` set it to x if `Option` is `None`
+
+#### Iterating over
+```rust
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+
+    scores.insert(String::from("Blue"), 10);
+    scores.insert(String::from("Yellow"), 50);
+
+    for (key, value) in &scores {
+        println!("{key}: {value}");
+    }
+```
+Iterates over tuple of key and value `(&K, &V)`
+
+#### Elements ownership
+
+If type hold in `HashMap` has a `Copy` trait it is copied inside. If not it is moved so using original is not valid.
+
+```rust
+    use std::collections::HashMap;
+
+    let field_name = String::from("Favorite color");
+    let field_value = String::from("Blue");
+
+    let mut map = HashMap::new();
+    map.insert(field_name, field_value);
+    // field_name and field_value are invalid at this point, try using them and
+    // see what compiler error you get! 
+```
+
+#### Entry API
+
+```rust
+    use std::collections::HashMap;
+
+    let mut scores = HashMap::new();
+    scores.insert(String::from("Blue"), 10);
+
+    scores.entry(String::from("Yellow")).or_insert(50);
+    scores.entry(String::from("Blue")).or_insert(50);
+
+    println!("{scores:?}");
+```
+Insert value if key does not exists. Returns `Entry` enum.
