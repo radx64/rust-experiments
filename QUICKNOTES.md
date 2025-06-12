@@ -49,6 +49,9 @@
       - [Iterating over](#iterating-over-1)
       - [Elements ownership](#elements-ownership)
       - [Entry API](#entry-api)
+  - [Error handling](#error-handling)
+    - [Panic behavior](#panic-behavior)
+    - [Result](#result)
 
 # Install rustup
 
@@ -593,3 +596,50 @@ If type hold in `HashMap` has a `Copy` trait it is copied inside. If not it is m
     println!("{scores:?}");
 ```
 Insert value if key does not exists. Returns `Entry` enum.
+
+## Error handling
+
+### Panic behavior
+To abort instead of stack unwind and exit on `panic!` set
+```toml
+[profile.release]
+panic = 'abort'
+```
+in `Cargo.toml`
+
+`panic!` macro crashes the program
+
+### Result
+
+```rust
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+`unwrap` returns `Ok` from `Result` or panics
+
+`expect` same as `unwrap` but defines `panic!` message
+
+`? operator` can be used to propagate `Err` up, so `?` means return Err(e) if Err(e)
+
+
+```rust
+use std::fs::File;
+use std::io::{self, Read};
+
+fn read_username_from_file() -> Result<String, io::Error> {
+    let mut username_file = File::open("hello.txt")?;
+    let mut username = String::new();
+    username_file.read_to_string(&mut username)?;
+    Ok(username)
+}
+```
+
+`Operator ?` can be chained like
+
+```rust
+File::open("hello.txt")?.read_to_string(&mut username)?;
+```
+
+This can also be used with `Option<T>` in simmilar manner. `Some(T)` or `None` will be returned.
