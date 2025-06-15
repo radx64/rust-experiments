@@ -55,6 +55,10 @@
   - [Generic types, traits and lifetimes](#generic-types-traits-and-lifetimes)
     - [Generics](#generics)
     - [Traits](#traits)
+      - [Default implementation](#default-implementation)
+      - [Traits as a parameters](#traits-as-a-parameters)
+      - [Where clause](#where-clause)
+      - [Return type traits](#return-type-traits)
 
 # Install rustup
 
@@ -692,3 +696,113 @@ fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T { ... }
 As in C++ templates, Rust with generics is monomorphizing types (replaces template/generic parameter with concrete type) during compilation, so generics does not have runtime performance overhead.
 
 ### Traits
+Traits define common behaviour (like interface) for different types.
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String;
+}
+
+pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&self) -> String {
+        format!("{}, by {} ({})", self.headline, self.author, self.location)
+    }
+}
+
+pub struct SocialPost {
+    pub username: String,
+    pub content: String,
+    pub reply: bool,
+    pub repost: bool,
+}
+
+impl Summary for SocialPost {
+    fn summarize(&self) -> String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+```
+
+> [!important]
+> We can implement a trait on a type only if either the trait or the type, or both, are local to our crate.
+
+
+#### Default implementation
+
+```rust
+pub trait Summary {
+    fn summarize(&self) -> String {
+        String::from("(Read more...)")
+    }
+}
+
+...
+
+impl Summary for NewsArticle {}  // use default implementation
+```
+
+#### Traits as a parameters
+
+```rust
+pub fn notify(item: &impl Summary) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+Use `impl Trait` tell that any type implementing `Trait` is accepted
+
+above is an equivalent to
+```rust
+pub fn notify<T: Summary>(item: &T) {
+    println!("Breaking news! {}", item.summarize());
+}
+```
+Traits can be joined so that type in parameter has to implement two or more traits. Operator `+` is used for that.
+
+```rust
+pub fn notify(item: &(impl Summary + Display)) { ... } 
+```
+or
+```rust
+pub fn notify<T: Summary + Display>(item: &T) { ... } 
+```
+
+#### Where clause
+Traits can be defined in `where` clause to clean up function declaration 
+```rust
+fn some_function<T, U>(t: &T, u: &U) -> i32
+where
+    T: Display + Clone,
+    U: Clone + Debug,
+{
+  ...
+```
+
+#### Return type traits
+Use `impl Trait` in return position to "something that implements Trait"
+```rust
+fn returns_summarizable() -> impl Summary {
+    SocialPost {
+        username: String::from("horse_ebooks"),
+        content: String::from(
+            "of course, as you probably already know, people",
+        ),
+        reply: false,
+        repost: false,
+    }
+}
+```
+Calling code sees only Summary trait returned, not concrete type, even if `SocialPost` is returned
+
+We can conditional implement a trait for type that implements other trait with syntax below.
+```rust
+impl<T: Display> ToString for T {
+    // --snip--
+}
+```
