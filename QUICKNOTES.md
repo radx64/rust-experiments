@@ -59,6 +59,7 @@
       - [Traits as a parameters](#traits-as-a-parameters)
       - [Where clause](#where-clause)
       - [Return type traits](#return-type-traits)
+    - [Lifetime annotation syntax](#lifetime-annotation-syntax)
 
 # Install rustup
 
@@ -806,3 +807,23 @@ impl<T: Display> ToString for T {
     // --snip--
 }
 ```
+
+### Lifetime annotation syntax
+
+`'` is used to annotate generic lifetime relationship (parameter name starts with it).
+
+```rust
+&i32        // a reference
+&'a i32     // a reference with an explicit lifetime
+&'a mut i32 // a mutable reference with an explicit lifetime
+```
+
+So as an example, we want the signature to express the following constraint: the returned reference will be valid as long as both the parameters are valid. This is the relationship between lifetimes of the parameters and the return value. We’ll name the lifetime 'a and then add it to each reference, as shown below
+```rust
+fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.len() > y.len() { x } else { y }
+}
+```
+
+> [!Note]
+> Above function signature now tells Rust that for some lifetime 'a, the function takes two parameters, both of which are string slices that live at least as long as lifetime 'a. The function signature also tells Rust that the string slice returned from the function will live at least as long as lifetime 'a. In practice, it means that the lifetime of the reference returned by the longest function is the same as the smaller of the lifetimes of the values referred to by the function arguments. These relationships are what we want Rust to use when analyzing this code.

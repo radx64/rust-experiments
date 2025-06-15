@@ -2,8 +2,7 @@ mod pair;
 
 use pair::Pair;
 
-struct Foo{
-
+struct Foo {
 }
 
 fn main() {
@@ -19,6 +18,4 @@ fn main() {
 
     let s: Pair<Foo> = Pair::new(Foo{}, Foo{});
     // s.cmp_display(); this will not compile as Foo does not implements PartialOrd
-
-    println!("Hello, world!");
 }
