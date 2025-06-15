@@ -810,7 +810,7 @@ impl<T: Display> ToString for T {
 
 ### Lifetime annotation syntax
 
-`'` is used to annotate generic lifetime relationship (parameter name starts with it).
+`'` is used to annotate generic lifetime relationship (lifetime name starts with it).
 
 ```rust
 &i32        // a reference
