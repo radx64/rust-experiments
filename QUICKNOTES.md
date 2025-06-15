@@ -52,6 +52,9 @@
   - [Error handling](#error-handling)
     - [Panic behavior](#panic-behavior)
     - [Result](#result)
+  - [Generic types, traits and lifetimes](#generic-types-traits-and-lifetimes)
+    - [Generics](#generics)
+    - [Traits](#traits)
 
 # Install rustup
 
@@ -643,3 +646,49 @@ File::open("hello.txt")?.read_to_string(&mut username)?;
 ```
 
 This can also be used with `Option<T>` in simmilar manner. `Some(T)` or `None` will be returned.
+
+## Generic types, traits and lifetimes
+
+### Generics
+Simmilar to templates in C++. Type placeholder in `<>` before function parameters or next to struct or enum name.
+
+eg.:
+```rust
+fn largest<T>(list: &[T]) -> &T { ... }
+...
+
+struct Point<T> {
+    x: T,
+    y: T,
+}
+
+impl<T> Point<T> {    // this first <T> after impl is needed to tell compiler that <T> in Point is generic type, not concrete one
+    fn x(&self) -> &T {
+        &self.x
+    }
+}
+
+// Specialization (method accessible only for f32)
+impl Point<f32> {
+    fn distance_from_origin(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+ 
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+```
+
+To restrict types that can be used with T, need to define trait.
+
+eg.:
+```rust
+fn largest<T: std::cmp::PartialOrd>(list: &[T]) -> &T { ... }
+```
+
+As in C++ templates, Rust with generics is monomorphizing types (replaces template/generic parameter with concrete type) during compilation, so generics does not have runtime performance overhead.
+
+### Traits
