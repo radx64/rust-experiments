@@ -60,6 +60,8 @@
       - [Where clause](#where-clause)
       - [Return type traits](#return-type-traits)
     - [Lifetime annotation syntax](#lifetime-annotation-syntax)
+    - [Lifetime elision rules](#lifetime-elision-rules)
+    - [Static lifetime](#static-lifetime)
 
 # Install rustup
 
@@ -827,3 +829,14 @@ fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
 
 > [!Note]
 > Above function signature now tells Rust that for some lifetime 'a, the function takes two parameters, both of which are string slices that live at least as long as lifetime 'a. The function signature also tells Rust that the string slice returned from the function will live at least as long as lifetime 'a. In practice, it means that the lifetime of the reference returned by the longest function is the same as the smaller of the lifetimes of the values referred to by the function arguments. These relationships are what we want Rust to use when analyzing this code.
+
+
+### Lifetime elision rules
+Compiler uses three rules so reference parameters 
+1. compiler assigns a lifetime parameter to each parameter that’s a reference. In other words, a function with one parameter gets one lifetime parameter: `fn foo<'a>(x: &'a i32)`; a function with two parameters gets two separate lifetime parameters: `fn foo<'a, 'b>(x: &'a i32, y: &'b i32);` and so on.
+2. if there is exactly one input lifetime parameter, that lifetime is assigned to all output lifetime parameters: `fn foo<'a>(x: &'a i32) -> &'a i32.`
+3. if there are multiple input lifetime parameters, but one of them is `&self` or `&mut self` because this is a method, the lifetime of self is assigned to all output lifetime parameters. This third rule makes methods much nicer to read and write because fewer symbols are necessary.
+
+
+### Static lifetime
+`'static` denotes that the affected reference can live for the entire duration of the program.
