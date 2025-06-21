@@ -62,6 +62,10 @@
     - [Lifetime annotation syntax](#lifetime-annotation-syntax)
     - [Lifetime elision rules](#lifetime-elision-rules)
     - [Static lifetime](#static-lifetime)
+  - [Testing](#testing)
+    - [Useful macros](#useful-macros)
+    - [Panics](#panics)
+    - [Result\<T, E\> in tests](#resultt-e-in-tests)
 
 # Install rustup
 
@@ -840,3 +844,44 @@ Compiler uses three rules so reference parameters
 
 ### Static lifetime
 `'static` denotes that the affected reference can live for the entire duration of the program.
+
+
+## Testing
+
+`cargo test` - runs all tests
+
+Below attribute annotates that function is a test function
+```rust
+#[test]
+```
+
+### Useful macros
+- `assert!(var: bool)`
+- `assert_eq!(left: &T, right: &T)`
+- `assert_ne!(left: &T, right: &T)`
+
+`assert_eq` and `assert_ne` uses `==` and `!=` operators so compared types need to implement `PartialEq` trait (and `Debug` for printing). Normally adding `#[derive(PartialEq, Debug)]` to custom struct should be enough.
+
+Asserts can print custom messages (add as a last argument, can use `!format` strings)
+### Panics
+`#[should_panic]` attribute checks if tests panics (as an expectation)
+
+`#[should_panic(expected = "expected panic text")]` - make panic check more precise, panic text need to contain a **expected substring**.
+
+### Result<T, E> in tests
+
+Tests can return Result<T, E> type sa an return value to conveniently fail. See below:
+
+```rust
+    #[test]
+    fn it_works() -> Result<(), String> {
+        let result = add(2, 2);
+
+        if result == 4 {
+            Ok(())
+        } else {
+            Err(String::from("two plus two does not equal four"))
+        }
+    }
+```
+`Ok` means pass, `Err` fail. **`#[should_panic]` can't be used with such tests**
