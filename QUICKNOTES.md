@@ -66,6 +66,15 @@
     - [Useful macros](#useful-macros)
     - [Panics](#panics)
     - [Result\<T, E\> in tests](#resultt-e-in-tests)
+    - [Running tests](#running-tests)
+      - [Basic cargo usage](#basic-cargo-usage)
+      - [Running tests by name](#running-tests-by-name)
+      - [Ignoring tests](#ignoring-tests)
+    - [Testing convention - Unit tests](#testing-convention---unit-tests)
+    - [Testing private functions](#testing-private-functions)
+    - [Testing convention - Integration tests](#testing-convention---integration-tests)
+      - [Sharing common code between tests](#sharing-common-code-between-tests)
+        - [Integration Tests for Binary Crates](#integration-tests-for-binary-crates)
 
 # Install rustup
 
@@ -885,3 +894,107 @@ Tests can return Result<T, E> type sa an return value to conveniently fail. See 
     }
 ```
 `Ok` means pass, `Err` fail. **`#[should_panic]` can't be used with such tests**
+
+
+### Running tests
+#### Basic cargo usage
+`cargo test` to run tests
+
+` -- ` separator is used to pass parameters to test binary instead of `cargo test`
+
+`cargo test --help` vs `cargo test -- --help`
+
+`cargo test -- --test-threads=1` to select how much threads to allocate for tests running
+
+`cargo test -- --show-output` to show output even if tests are passing
+
+#### Running tests by name
+
+`cargo test <test_namesubstring>` - run tests matching given substring
+
+#### Ignoring tests
+
+Use ignore atribute to ignore test execution
+```rust
+#[test]
+#[ignore]
+fn expensive_test() {
+    // code that takes an hour to run
+}
+```
+
+> [!important]
+> `ignore` attrubute need to be after `test` one
+
+To run ignoredd tests use `cargo test -- --ignored` (params to test binary not cargo)
+
+To run all test including ignored ones
+`cargo test -- --include-ignored`
+
+
+### Testing convention - Unit tests
+
+Unit tests should be put in src directory in each file with the code that they are testing. Tests should be in `test` module and be annotated with `cfg(test)`
+
+The `#[cfg(test)]` annotation tells rust compiler to build and run these only in `cargo test` targe (in rust it is called configuration option). (it a bit like #ifdef X for conditional builds in cpp)
+
+### Testing private functions
+
+Whenever it is or not a good practice to do it, in Rust private (not `pub`) functions can be tested, as tests module is a child of parent module.
+
+```rust
+pub fn add_two(a: usize) -> usize {
+    internal_adder(a, 2)
+}
+
+fn internal_adder(left: usize, right: usize) -> usize {
+    left + right
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn internal() {
+        let result = internal_adder(2, 2);
+        assert_eq!(result, 4);
+    }
+}
+```
+as scope of parent is bring in by `use super::*`
+test can call parent functions (even if these are not "exported")
+
+### Testing convention - Integration tests
+For integration tests the story is a bit different. Integration tests are using only public interface of a library.
+
+Integration tests are put in `tests` directory.
+
+There can be multiple files with tests. Cargo will compile all of them to separate crates.
+
+`cargo test --test integration_test` to run `integration_test` suite (from that crate)
+
+#### Sharing common code between tests
+
+Instead of creating `tests/common.rs` file with common methods (it will produce `Running tests/common.rs` section without any tests)
+
+You should use old mod convention
+```
+├── Cargo.lock
+├── Cargo.toml
+├── src
+│   └── lib.rs
+└── tests
+    ├── common
+    │   └── mod.rs
+    └── integration_test.rs
+```
+so create `common` directory with `mod.rs` file inside
+
+> [!important]
+> Files in subdirectories of `tests` directory are not compiled as separate crates
+
+##### Integration Tests for Binary Crates
+As binary create does not expose public functions this is not possible.
+
+Common approach is to have both simple `src/main.rs` and implementation as `src/lib.rs` which exposes interface.
