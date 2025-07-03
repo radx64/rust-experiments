@@ -75,6 +75,11 @@
     - [Testing convention - Integration tests](#testing-convention---integration-tests)
       - [Sharing common code between tests](#sharing-common-code-between-tests)
         - [Integration Tests for Binary Crates](#integration-tests-for-binary-crates)
+  - [Program arguments](#program-arguments)
+  - [File System](#file-system)
+  - [Process exit code](#process-exit-code)
+  - [Environment variables](#environment-variables)
+  - [Standard error output stream](#standard-error-output-stream)
 
 # Install rustup
 
@@ -152,6 +157,8 @@ let tup: (i32, f64, u8) = (500, 6.4, 1);
 
 ## Strings
   `str` - basic string slice type to which String is convertible
+
+  `"\` - backslash after openiong double quote tells Rust not to put a newline character at the begining
 
 ## Mutable and immutable references
   You can't have both mutable an immutable references (borrows) at the same time
@@ -998,3 +1005,28 @@ so create `common` directory with `mod.rs` file inside
 As binary create does not expose public functions this is not possible.
 
 Common approach is to have both simple `src/main.rs` and implementation as `src/lib.rs` which exposes interface.
+
+
+## Program arguments
+
+`std::env::args()` provide and interator to access command line arguments of a program. To get a collection from that iterator, we need to call an `.collect()` method.
+
+> [!important]
+> If unicode character support is needed, instead of `args`, `args_os` need to be used.
+>
+
+## File System
+
+Reading file can be done using `std::fs::read_to_string(file_path)`.
+
+## Process exit code
+
+Use `std::process::exit(x)` for that
+
+## Environment variables
+
+Use `use std::env::var("FLAG").is_ok()` to to check for existence **(not value)**
+
+## Standard error output stream
+
+Use `eprintln!` macro instead of `println!`.
