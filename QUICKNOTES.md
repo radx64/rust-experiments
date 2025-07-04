@@ -80,6 +80,13 @@
   - [Process exit code](#process-exit-code)
   - [Environment variables](#environment-variables)
   - [Standard error output stream](#standard-error-output-stream)
+  - [Closures](#closures)
+      - [Types](#types)
+      - [Examples](#examples)
+    - [Comparision to functions syntax](#comparision-to-functions-syntax)
+    - [Closure that takes an ownership of the value](#closure-that-takes-an-ownership-of-the-value)
+  - [Iterators](#iterators)
+    - [Some iterators methods](#some-iterators-methods)
 
 # Install rustup
 
@@ -1030,3 +1037,78 @@ Use `use std::env::var("FLAG").is_ok()` to to check for existence **(not value)*
 ## Standard error output stream
 
 Use `eprintln!` macro instead of `println!`.
+
+
+## Closures
+A bit simmilar to lambdas (but not quite). Can capture context from a scope. 
+
+#### Types
+
+- `FnOnce()` - closures that can be called once. Moves captures values out of its body.
+- `FnMut()` - don't move captured values out of their body but can mutate captured values.
+- `Fn()` - don't move captured values out of their body and dont mutate captured values.
+
+
+#### Examples
+
+Closure that calls a method on object
+```rust
+// snip
+
+user_preference.unwrap_or_else(|| self.most_stocked())
+
+// snip
+```
+
+Closure that sleeps (got parameter and explicitly declares a return type)
+
+```rust
+// snip
+let expensive_closure = |num: u32| -> u32 {
+    println!("calculating slowly...");
+    thread::sleep(Duration::from_secs(2));
+    num
+};
+// snip
+```
+
+### Comparision to functions syntax
+```rust
+fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+let add_one_v2 = |x: u32| -> u32 { x + 1 };
+let add_one_v3 = |x|             { x + 1 };
+let add_one_v4 = |x|               x + 1  ;
+```
+
+### Closure that takes an ownership of the value
+
+Use `move` keyword before `||`
+
+example:
+```rust
+use std::thread;
+
+fn main() {
+    let list = vec![1, 2, 3];
+    println!("Before defining closure: {list:?}");
+
+    thread::spawn(move || println!("From thread: {list:?}"))
+        .join()
+        .unwrap();
+}
+```
+
+## Iterators
+Used as any other languages that implements iterators, iterates over a set of values.
+
+All iterators implements a `Iterator` trait.
+
+**Consuming adapters** are iterator methods that consume iterator (like `iter().sum()`)
+**Iterator adapters** does not consume iterator, they produce different iterators by changng some aspect of an original (like `iter().map(F)`).
+
+
+### Some iterators methods
+- `map`
+- `sum`
+- `filter`
+- `collect`
