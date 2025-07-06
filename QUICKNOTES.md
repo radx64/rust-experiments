@@ -1,13 +1,32 @@
 # ToC 
 - [ToC](#toc)
-- [Install rustup](#install-rustup)
+- [Rustup](#rustup)
+  - [Install rustup](#install-rustup)
   - [Rustup basic info](#rustup-basic-info)
   - [Updating](#updating)
   - [Local doc](#local-doc)
-  - [Cargo commands](#cargo-commands)
+- [Cargo](#cargo)
+  - [Commands](#commands)
+  - [Customizing profiles](#customizing-profiles)
+    - [Profile settings](#profile-settings)
+      - [opt-level](#opt-level)
+      - [debug](#debug)
+      - [split-debuginfo](#split-debuginfo)
+      - [strip](#strip)
+      - [debug-assertions](#debug-assertions)
+      - [overflow-checks](#overflow-checks)
+      - [lto](#lto)
+      - [panic](#panic)
+      - [incremental](#incremental)
+      - [codegen-units](#codegen-units)
+      - [rpath](#rpath)
 - [Language](#language)
   - [Arrays](#arrays)
   - [Tuples](#tuples)
+  - [Comments](#comments)
+    - [Code comments](#code-comments)
+    - [Documentation comments](#documentation-comments)
+    - [Contained items comment](#contained-items-comment)
   - [Borrows](#borrows)
   - [Strings](#strings)
   - [Mutable and immutable references](#mutable-and-immutable-references)
@@ -88,7 +107,9 @@
   - [Iterators](#iterators)
     - [Some iterators methods](#some-iterators-methods)
 
-# Install rustup
+# Rustup
+
+## Install rustup
 
 ```
 $ curl --proto '=https' --tlsv1.2 https://sh.rustup.rs -sSf | sh
@@ -130,18 +151,82 @@ rustup update
 ```
 rustup doc
 ```
-## Cargo commands
+# Cargo 
+
+## Commands
 
 ```
 cargo new <project_name> - creates new project called <project_name>
 cargo init            - convert directory to cargo project (code need to be moved to src subdir first)
 cargo build           - builds debug version of a project
 cargo build --release - builds release version of a project
+cargo doc             - builds documentation
 cargo run             - build if needded and run project
 cargo check           - check if project compiles
+cargo test            - run tests target
+cargo bench           - run benchmarks target
 ```
 
 Cargo stores compilation results in `target/` directory
+
+## Customizing profiles
+Create `[profile.*]` section in Cargo.toml file to customize settings like opt-level.
+
+More info [here](https://doc.rust-lang.org/cargo/reference/profiles.html).
+
+```toml
+[profile.dev]
+opt-level = 0
+
+[profile.release]
+opt-level = 3
+```
+
+### Profile settings
+
+#### opt-level
+`0` - no optimization <br>
+`1` - basic optimizations <br>
+`2` - some optimizations <br>
+`3` - all optimizations <br>
+`"s"` - optimize for size <br>
+`"z"` - optimize for size but turn off loop vectorization <br>
+
+#### debug
+`0`, `false`, `"none"` - no debug info <br>
+`"line-directives-only"` - line info directives only <br>
+`"line-tables-only"` - line tables only <br>
+`1` or `"limited"` - debug info without type oe variable level information, little more detailed as `line-tables-only` <br>
+`2`, `true` or `"full"` - full debug info, default for dev profile <br>
+More info [here](https://doc.rust-lang.org/rustc/codegen-options/index.html#debuginfo)
+
+#### split-debuginfo
+Controls if debug information is placed inside executable or next to it.
+
+#### strip
+Used to control of striping info from binary eg. `debuginfo`
+
+#### debug-assertions
+Controls if `debug_asset!` macro is compiled in or out
+
+#### overflow-checks
+Controls if runtime integer overflow checks are enabled, thus panic will occur.
+
+#### lto
+Configures link time optimization level
+
+#### panic
+Controls if panic should unwind stack or hard abort process upon panic.
+
+#### incremental
+Disables or enables incremental compilation.
+
+#### codegen-units
+Controls how many code generation units the crate will be split to.
+
+#### rpath
+Control if rpath is enabled or not.
+
 
 # Language
 drop - function called when object goes out of scope (destructor? - not exactly, cant use Copy if drop is used)
@@ -158,6 +243,19 @@ let a = [1, 2, 3, 4, 5];
 ```rust
 let tup: (i32, f64, u8) = (500, 6.4, 1);
 ```
+
+## Comments
+### Code comments
+Use `// ` for commenting code
+
+### Documentation comments
+Use `/// ` for creating documentation comments that will be visible in HTML docs.
+Markdown syntax is supported.
+
+Documentation comments that have rust syntax embedded are automatically converted to tests.
+
+### Contained items comment
+Use `//! ` to comment module or a crate as a whole, not an item following as in the `/// `
 
 ## Borrows
   `&` - acts as a reference (borrows instance)
@@ -885,7 +983,7 @@ Below attribute annotates that function is a test function
 
 `assert_eq` and `assert_ne` uses `==` and `!=` operators so compared types need to implement `PartialEq` trait (and `Debug` for printing). Normally adding `#[derive(PartialEq, Debug)]` to custom struct should be enough.
 
-Asserts can print custom messages (add as a last argument, can use `!format` strings)
+    Asserts can print custom messages (add as a last argument, can use `!format` strings)
 ### Panics
 `#[should_panic]` attribute checks if tests panics (as an expectation)
 
