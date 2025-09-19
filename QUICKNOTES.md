@@ -20,6 +20,11 @@
       - [incremental](#incremental)
       - [codegen-units](#codegen-units)
       - [rpath](#rpath)
+  - [Creating crate on crates.io](#creating-crate-on-cratesio)
+  - [Updating a create on crates.io](#updating-a-create-on-cratesio)
+  - [Deprecating old versions](#deprecating-old-versions)
+  - [Undeprecating old versions](#undeprecating-old-versions)
+  - [Workspaces](#workspaces)
 - [Language](#language)
   - [Arrays](#arrays)
   - [Tuples](#tuples)
@@ -106,6 +111,7 @@
     - [Closure that takes an ownership of the value](#closure-that-takes-an-ownership-of-the-value)
   - [Iterators](#iterators)
     - [Some iterators methods](#some-iterators-methods)
+  - [Public reexports](#public-reexports)
 
 # Rustup
 
@@ -227,6 +233,50 @@ Controls how many code generation units the crate will be split to.
 #### rpath
 Control if rpath is enabled or not.
 
+## Creating crate on crates.io
+
+1. Set-up profile and retrieve api-key
+2. `cargo login` api-key (::secret::)
+3. update crate metadata in Cargo.toml
+   - add `name = "my_crate_name"` under `[package]`
+   - add `license = "your selected license"` see [here](https://spdx.org/licenses/)
+     - or license-file if different that SPDX one
+   - `version`
+   - `edition`
+   - `desription`
+   - generally everything needed is describe [here](https://doc.rust-lang.org/cargo/)
+4. `cargo publish` 
+   
+## Updating a create on crates.io
+1. Make changes
+2. Update the version - good to keep semantic versioning rules, see [here](https://semver.org/)
+3. `cargo publish`
+
+## Deprecating old versions
+`cargo yank --vers 1.0.1`
+
+## Undeprecating old versions
+`cargo yank --vers 1.0.1 --undo`
+
+## Workspaces
+Workspace is a set of pacgkages that shares same Cargo.lock (external packages versions) and output directory.
+
+Creating workspace goes as follows:
+1. create a directory
+   - `mkdir my_workspace`
+2. create a `Cargo.toml` file
+   - `echo -e '[workspace]\nresolver = "3"' > Cargo.toml` setting resolver version withouth packages
+3. create new binary using standard `cargo new <binary>`
+   - you can create more binaries or libs in same way, they will be added to `members` section in main Cargo.toml
+  
+To have dependencies between packages inside workpsace solvable, paths need to be setup in given binaries Cargo.toml files like below:
+```toml
+...
+[dependencies]
+add_one = { path = "../add_one" }
+...
+```
+To run specifgc binary from the workspace `cargo run -p <binary>`
 
 # Language
 drop - function called when object goes out of scope (destructor? - not exactly, cant use Copy if drop is used)
@@ -1202,6 +1252,7 @@ Used as any other languages that implements iterators, iterates over a set of va
 All iterators implements a `Iterator` trait.
 
 **Consuming adapters** are iterator methods that consume iterator (like `iter().sum()`)
+
 **Iterator adapters** does not consume iterator, they produce different iterators by changng some aspect of an original (like `iter().map(F)`).
 
 
@@ -1210,3 +1261,44 @@ All iterators implements a `Iterator` trait.
 - `sum`
 - `filter`
 - `collect`
+
+
+## Public reexports
+You can use `pub use` to reexport items.
+
+``` rust
+//! # Art
+//!
+//! A library for modeling artistic concepts.
+
+pub use self::kinds::PrimaryColor;      // this is re-export as art::PrimaryColor
+pub use self::kinds::SecondaryColor;    // this is re-export as art::SecondaryColor
+pub use self::utils::mix;               // this is re-export as art::mix
+
+pub mod kinds {
+    /// The primary colors according to the RYB color model.
+    pub enum PrimaryColor {
+        Red,
+        Yellow,
+        Blue,
+    }
+
+    /// The secondary colors according to the RYB color model.
+    pub enum SecondaryColor {
+        Orange,
+        Green,
+        Purple,
+    }
+}
+
+pub mod utils {
+    use crate::kinds::*;
+
+    /// Combines two primary colors in equal amounts to create
+    /// a secondary color.
+    pub fn mix(c1: PrimaryColor, c2: PrimaryColor) -> SecondaryColor {
+        // --snip--
+    }
+}
+
+```
