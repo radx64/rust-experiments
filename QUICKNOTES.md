@@ -7,6 +7,7 @@
   - [Local doc](#local-doc)
 - [Cargo](#cargo)
   - [Commands](#commands)
+    - [Extending cargo](#extending-cargo)
   - [Customizing profiles](#customizing-profiles)
     - [Profile settings](#profile-settings)
       - [opt-level](#opt-level)
@@ -163,17 +164,23 @@ rustup doc
 
 ```
 cargo new <project_name> - creates new project called <project_name>
-cargo init            - convert directory to cargo project (code need to be moved to src subdir first)
-cargo build           - builds debug version of a project
-cargo build --release - builds release version of a project
-cargo doc             - builds documentation
-cargo run             - build if needded and run project
-cargo check           - check if project compiles
-cargo test            - run tests target
-cargo bench           - run benchmarks target
+cargo init               - convert directory to cargo project (code need to be moved to src subdir first)
+cargo build              - builds debug version of a project
+cargo build --release    - builds release version of a project
+cargo doc                - builds documentation
+cargo run                - build if needded and run project
+cargo check              - check if project compiles
+cargo test               - run tests target
+cargo bench              - run benchmarks target
+cargo install <binname>  - install binary target (application) from cargo.io
 ```
 
 Cargo stores compilation results in `target/` directory
+
+### Extending cargo
+
+If binary is in $PATH is named `cargo-something` it can be run as `cargo something`.
+Cargo commands can be listed using `cargo --list`
 
 ## Customizing profiles
 Create `[profile.*]` section in Cargo.toml file to customize settings like opt-level.
@@ -445,7 +452,7 @@ fn describe_state_quarter(coin: Coin) -> Option<String> {
     };
 
     if state.existed_in(1900) {
-        Some(format!("{state:?} is pretty old, for America1"))
+        Some(format!("{state:?} is pretty old, for America"))
     }
     else {
         Some(format!("{state:?} is relatively new."))
