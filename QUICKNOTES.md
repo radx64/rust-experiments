@@ -113,6 +113,11 @@
   - [Iterators](#iterators)
     - [Some iterators methods](#some-iterators-methods)
   - [Public reexports](#public-reexports)
+  - [Smart pointers](#smart-pointers)
+    - [Common smart pointers](#common-smart-pointers)
+    - [Deref](#deref)
+      - [Mutability and deref coercion](#mutability-and-deref-coercion)
+    - [Drop](#drop)
 
 # Rustup
 
@@ -1309,3 +1314,33 @@ pub mod utils {
 }
 
 ```
+
+## Smart pointers
+
+Pointer works simmilary as in C++. Reference `&` is a pointer that borrow value its points to.
+References does not have any special capabilites nor overhead. That is not true for smart pointers.
+
+Smart pointers are usually implemented using structs. They implement `Deref` and `Drop` traits. `Deref` allows an instance of smart pointer ot behave like a reference. `Drop` allows to customize destruction (going out of scope).
+
+### Common smart pointers
+ - `Box<T>`, for allocating values on a heap. Simmilar to `unique_ptr<T>` in C++.
+ - `Rc<T>`, a reference counting type that enables multiple ownership. Something like `shared_ptr<T>` in C++.
+ - `Ref<T>` and `RefMut<T>` accessed through `RefCell<T>`, a type that enforces borrowing rules at runtime instead of compile time. I don't think we have something simmilar in C++ as C++ does not have borrow checker.
+
+### Deref
+
+To enable `*` operator on your type implement `Deref` trait (`deref` method). Under the hood rust will `*(instance.deref())` when calling `*`.
+
+`Deref` coercion converts a reference to a type that implements the `Deref` trait into a reference to another type. For example, deref coercion can convert `&String` to `&str` because `String` implements the `Deref` trait such that it returns &str. 
+
+#### Mutability and deref coercion
+
+Rust does deref coercion when it finds types and trait implementations in three cases:
+- From `&T` to `&U` when `T: Deref<Target=U>`
+- From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
+- From `&mut T` to `&U` when `T: Deref<Target=U>`
+
+
+### Drop
+This trait works like destructor in C++. Implements `drop` method which can't be called manually.
+To release resources manually `std::mem::drop(instance)` can be used. 
