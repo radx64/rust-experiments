@@ -1326,6 +1326,7 @@ Smart pointers are usually implemented using structs. They implement `Deref` and
  - `Box<T>`, for allocating values on a heap. Simmilar to `unique_ptr<T>` in C++.
  - `Rc<T>`, a reference counting type that enables multiple ownership. Something like `shared_ptr<T>` in C++.
  - `Ref<T>` and `RefMut<T>` accessed through `RefCell<T>`, a type that enforces borrowing rules at runtime instead of compile time. I don't think we have something simmilar in C++ as C++ does not have borrow checker.
+    - `RefCell<T>` is a runtime borrow checker for interior mutability (refcell is immutable but contents can be mutated by borrowing - `borrow_mut()`)
 
 ### Deref
 
@@ -1339,7 +1340,6 @@ Rust does deref coercion when it finds types and trait implementations in three 
 - From `&T` to `&U` when `T: Deref<Target=U>`
 - From `&mut T` to `&mut U` when `T: DerefMut<Target=U>`
 - From `&mut T` to `&U` when `T: Deref<Target=U>`
-
 
 ### Drop
 This trait works like destructor in C++. Implements `drop` method which can't be called manually.
