@@ -118,6 +118,7 @@
     - [Deref](#deref)
       - [Mutability and deref coercion](#mutability-and-deref-coercion)
     - [Drop](#drop)
+    - [Rc](#rc)
 
 # Rustup
 
@@ -1326,7 +1327,7 @@ Smart pointers are usually implemented using structs. They implement `Deref` and
  - `Box<T>`, for allocating values on a heap. Simmilar to `unique_ptr<T>` in C++.
  - `Rc<T>`, a reference counting type that enables multiple ownership. Something like `shared_ptr<T>` in C++.
  - `Ref<T>` and `RefMut<T>` accessed through `RefCell<T>`, a type that enforces borrowing rules at runtime instead of compile time. I don't think we have something simmilar in C++ as C++ does not have borrow checker.
-    - `RefCell<T>` is a runtime borrow checker for interior mutability (refcell is immutable but contents can be mutated by borrowing - `borrow_mut()`)
+ - `RefCell<T>` is a runtime borrow checker for interior mutability (refcell is immutable but contents can be mutated by borrowing - `borrow_mut()`)
 
 ### Deref
 
@@ -1344,3 +1345,9 @@ Rust does deref coercion when it finds types and trait implementations in three 
 ### Drop
 This trait works like destructor in C++. Implements `drop` method which can't be called manually.
 To release resources manually `std::mem::drop(instance)` can be used. 
+
+### Rc
+
+`Rc::clone()` to increase reference count of hold object (like copying shared_ptr in C++)
+`Rc::downgrade()` opposite to above (like crating weak_ptr in C++), returns `Weak<T>`
+`Rc::upgrade()` called on `Weak<T>` returns `Option<Rc<T>>` to assure that pointed object is still valid. Simmilar to C++ `std::weak_ptr::lock()`
